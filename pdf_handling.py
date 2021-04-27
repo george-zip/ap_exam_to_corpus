@@ -24,4 +24,5 @@ def extract_text(file_name, char_margin=2.0, word_margin=0.1, line_margin=0.5, v
         for page in PDFPage.create_pages(doc):
             interpreter.process_page(page)
 
+        # TODO: make encoding is Unicode
         return output_string.getvalue()
