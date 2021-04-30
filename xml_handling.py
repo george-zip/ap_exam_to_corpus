@@ -1,22 +1,10 @@
+import datetime
 import xml.etree.ElementTree as ET
 
 
-def validate(root):
-    import xmlschema as schema
-    pass
-
-
-def get_header(meta_data):
-    header = ET.Element("teiHeader")
-    add_or_set(add_or_set(add_or_set(header, "fileDesc"), "titleStmt"), "title", meta_data["title"])
-    add_or_set(add_or_set(add_or_set(header, "fileDesc"), "publicationStmt"), "publisher", meta_data["publisher"])
-    add_or_set(add_or_set(
-        add_or_set(add_or_set(header, "fileDesc"), "publicationStmt"),
-        "availability"
-    ), "p", meta_data["availability"])
-    add_or_set(add_or_set(add_or_set(header, "fileDesc"), "sourceDesc"), "p", meta_data["source"])
-    add_or_set(add_or_set(header, "encodingDesc"), "p", meta_data["encoding"])
-    return header
+def validate(xml, schema_location):
+    import xmlschema
+    xmlschema.validate(xml, schema=schema_location)
 
 
 def add_or_set(parent, tag_name, text=None, attribute_name=None, attribute_val=None):
@@ -31,9 +19,27 @@ def add_or_set(parent, tag_name, text=None, attribute_name=None, attribute_val=N
     return tmp
 
 
+def get_header(meta_data):
+    header = ET.Element("teiHeader")
+    add_or_set(add_or_set(add_or_set(header, "fileDesc"), "titleStmt"), "title", meta_data["title"])
+    add_or_set(add_or_set(add_or_set(header, "fileDesc"), "publicationStmt"), "publisher", meta_data["publisher"])
+    add_or_set(add_or_set(
+        add_or_set(add_or_set(header, "fileDesc"), "publicationStmt"),
+        "availability"
+    ), "p", meta_data["availability"])
+    add_or_set(add_or_set(add_or_set(header, "fileDesc"), "sourceDesc"), "p", meta_data["source"])
+    add_or_set(add_or_set(header, "encodingDesc"), "p", meta_data["encoding"])
+    add_or_set(add_or_set(add_or_set(header, "profileDesc"), "langUsage"), "language", meta_data["language"], "ident",
+               meta_data["language_ident"])
+    item = add_or_set(add_or_set(add_or_set(header, "revisionDesc"), "list"), "item")
+    dt = datetime.datetime.strptime(meta_data["revision_date"], "%Y-%m-%d")
+    add_or_set(item, "date", f"{dt:%d} {dt:%b} {dt:%y}", "when", meta_data["revision_date"])
+    return header
+
+
 def corpus_to_xml(sections, meta_data):
     root = ET.Element("TEI")
-    root.attrib["xmlns:ns"] = "http://www.tei-c.org/ns/1.0"
+    root.attrib["xmlns:ns"] = meta_data["tei_schema"]
     root.append(get_header(meta_data))
     body = add_or_set(add_or_set(root, "text"), "body")
     list_elem = add_or_set(body, "list")
@@ -54,5 +60,4 @@ def corpus_to_xml(sections, meta_data):
                 else:
                     add_or_set(s, "w", word, "pos", pos_tag)
         add_or_set(span_grp, "span", section.type, "from", section_id)
-    validate(root)
     return root
