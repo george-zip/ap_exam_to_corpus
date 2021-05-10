@@ -1,16 +1,23 @@
 from unittest import TestCase
 
+import nltk
+
 import text_handling
 
 
 class TextHandlingTest(TestCase):
-
     text = "One morning, when Gregor Samsa woke from troubled dreams, he found himself transformed in his bed " \
            "into a horrible vermin. He lay on his armour-like back, and if he lifted his head a little he could " \
            "see his brown belly, slightly domed and divided by arches into stiff sections."
 
+    def __init__(self, *args, **kwargs):
+        super(TextHandlingTest, self).__init__(*args, **kwargs)
+        nltk.download('punkt')
+        nltk.download('averaged_perceptron_tagger')
+
     def test_transform_text(self):
-        sentences, words, pos_tags = text_handling.transform_text(self.text)
+        # Reference: https://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html
+        sentences, words, pos_tags = text_handling.tokenize_text(self.text, nltk)
         self.assertIsNotNone(sentences)
         self.assertIsNotNone(words)
         self.assertIsNotNone(pos_tags)
@@ -25,7 +32,7 @@ class TextHandlingTest(TestCase):
         self.assertEqual(pos_tags[0][2][1], ",")
 
     def test_extract_section_reg_exp(self):
-        itr = text_handling.extract_section_reg_exp(self.text, "\sarmour\-like\sback\,", "description")
+        itr = text_handling.extract_section_reg_exp(self.text, "\sarmour\-like\sback\,", "description", nltk)
         self.assertIsNotNone(itr)
         try:
             s = next(itr)

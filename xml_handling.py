@@ -51,7 +51,8 @@ def corpus_to_xml(sections, meta_data):
         # 2. A span element that describes the item.
         # See https://www.tei-c.org/release/doc/tei-p5-doc/en/html/ref-span.html
         section_id = f"s{idx}"
-        item = add_or_set(list_elem, "item", attribute_name="xml:id", attribute_val=section_id)
+        item = ET.Element("item", {"xml:id": section_id})
+        list_elem.append(item)
         for sentence in section.contents:
             s = add_or_set(add_or_set(item, "l"), "s")
             for word, pos_tag in sentence:
