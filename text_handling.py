@@ -43,13 +43,14 @@ def extract_section_reg_exp(text, reg_exp, section_name, tokenizer):
 
 def extract_named_sections(text, tokenizer):
     """Extract all named sections of text"""
-    regular_expressions = {
+    section_regular_expressions = {
         "directions": "^Directions: [\w\d\s;.,:-]+\n",
-        "questions": "^\d+\..*\n"
+        "question_top_level": "^\d+\..*\n",
+        "question_sub_level": "^[abc]\).+[\s\n\r]*?.*\.",
+        "quotation": '^“[\w\d\s’.,-]*”'
     }
-    # TODO: Add more sections
-    for name in regular_expressions:
-        for section in extract_section_reg_exp(text, regular_expressions[name], name, tokenizer):
+    for name in section_regular_expressions:
+        for section in extract_section_reg_exp(text, section_regular_expressions[name], name, tokenizer):
             yield section
 
 
@@ -58,14 +59,16 @@ def fill_in_all_sections(named_sections, text, tokenizer):
     current_position = 0
     for section in named_sections:
         if section.start_position > current_position:
-            _, _, words_with_pos_tags = tokenize_text(text[current_position:section.start_position - 1], tokenizer)
-            yield CorpusSection("general", current_position, section.start_position - 1, words_with_pos_tags)
+            _, words, words_with_pos_tags = tokenize_text(text[current_position:section.start_position - 1], tokenizer)
+            if len(words):
+                yield CorpusSection("non_pedagogical", current_position, section.start_position - 1, words_with_pos_tags)
         yield section
         current_position = section.end_position + 1
     if current_position < len(text):
-        _, _, words_with_pos_tags = tokenize_text \
+        _, words, words_with_pos_tags = tokenize_text \
             (text[current_position:len(text) - 1], tokenizer)
-        yield CorpusSection("general", current_position, len(text) - 1, words_with_pos_tags)
+        if len(words):
+            yield CorpusSection("non_pedagogical", current_position, len(text) - 1, words_with_pos_tags)
 
 
 def extract_all_sections(text, tokenizer):
