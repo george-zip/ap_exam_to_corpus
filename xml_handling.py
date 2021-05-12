@@ -1,13 +1,18 @@
+"""
+Library for creating TEI document
+
+Available functions:
+- corpus_to_xml: generate TEI document
+- get_header: generate teiHeader
+- add_or_set: add child tag or set value
+"""
+
 import datetime
 import xml.etree.ElementTree as ET
 
 
-def validate(xml, schema_location):
-    import xmlschema
-    xmlschema.validate(xml, schema=schema_location)
-
-
 def add_or_set(parent, tag_name, text=None, attribute_name=None, attribute_val=None):
+    """Add child tag or set value if already present"""
     tmp = parent.find(tag_name)
     if not tmp:
         tmp = ET.Element(tag_name)
@@ -20,6 +25,7 @@ def add_or_set(parent, tag_name, text=None, attribute_name=None, attribute_val=N
 
 
 def get_header(meta_data):
+    """Generate teiHeader"""
     header = ET.Element("teiHeader")
     add_or_set(add_or_set(add_or_set(header, "fileDesc"), "titleStmt"), "title", meta_data["title"])
     add_or_set(add_or_set(add_or_set(header, "fileDesc"), "publicationStmt"), "publisher", meta_data["publisher"])
@@ -38,6 +44,15 @@ def get_header(meta_data):
 
 
 def corpus_to_xml(sections, meta_data):
+    """Generate TEI document based on list of CorpusSection tuples
+
+    Args:
+        sections: list of CorpusSection tuples
+        meta_data: dictionary of document and invocation-related meta-data
+
+    Returns:
+        xml.etree.Element
+    """
     root = ET.Element("TEI")
     root.attrib["xmlns:ns"] = meta_data["tei_schema"]
     root.append(get_header(meta_data))
