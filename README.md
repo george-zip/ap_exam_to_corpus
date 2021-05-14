@@ -35,6 +35,33 @@ optional arguments:
                         Path of yaml config file
 ```
 
+## Output
+
+The default output is a TEI corpus document. Structural elements are identified with a combination of the ```id``` attribute and the ```span``` element. An abbreviated example is below:
+
+```xml
+<TEI xmlns:ns="http://www.tei-c.org/ns/1.0">
+	<teiHeader>
+		...
+	</teiHeader>
+	<text>
+		<body>
+			<list>
+				<item xml:id="s0">
+					<l>
+						<s> <!-- sentence -->
+							<w pos="CD">2017</w> <!-- word -->
+					...
+			</list>
+			<spanGrp type="structure">
+				<span from="s0">non_pedagogical</span> <!-- from element links to id attribute in item above -->
+				...
+			</spanGrp>
+		</body>
+	</text>
+</TEI>
+```
+
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
